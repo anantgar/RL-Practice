@@ -38,6 +38,10 @@ def mc_prediction(policy, value_fn, env, num_iterations:int, first_visit:bool=Tr
             
 
 def exploring_starts(policy, value_fn, env, num_iterations:int, first_visit:bool=True):
+
+    def average_return(mean, n, g:float) -> float:
+        return (mean * n + g) / (n + 1) , n + 1
+
     returns = {}
     for _ in range(num_iterations):
         S_0, A_0 = env.get_random_state(), env.get_random_action()
@@ -49,18 +53,18 @@ def exploring_starts(policy, value_fn, env, num_iterations:int, first_visit:bool
 
             if (state, action) not in zip(states[:i], actions[:i]) and first_visit:
                 if (state, action) not in returns:
-                    returns[(state, action)] = []
-                returns[(state, action)].append(G)
-                value_fn[state, action] = np.mean(returns[(state, action)])
+                    returns[(state, action)] = (0.0, 0)
+                returns[(state, action)] = average_return(*returns[(state, action)], G)
+                value_fn[state, action] = returns[(state, action)][0]
                 policy[state] = np.argmax(value_fn[state])
 
 
 def main():
     env = CliffWalk(x_dim=12, y_dim=4, is_slippery=False)
     policy = np.random.choice(a=[0,1,2,3], size=env.x_dim * env.y_dim, replace=True)
-    value_fn = 2 * np.random.rand(env.x_dim * env.y_dim) - 1
-    mc_prediction(policy, value_fn, env, num_iterations=10, first_visit=True)
-    print(value_fn.reshape(env.y_dim, env.x_dim))
+    value_fn = 2 * np.zeros((env.x_dim * env.y_dim, 4))
+    exploring_starts(policy, value_fn, env, num_iterations=1000, first_visit=True)
+    env.visualize_action_value_function(value_fn)
     
 
 if __name__ == "__main__":
