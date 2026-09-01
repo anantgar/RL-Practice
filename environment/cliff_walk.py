@@ -44,6 +44,9 @@ class CliffWalk(Environment):
     def get_random_state(self):
         return random.randint(0, self.x_dim * (self.y_dim - 1))
     
+    def get_random_action(self):
+        return random.randint(0, 3)
+    
     def _compact_state(self, state):
         return state[1] * self.x_dim + state[0]
     

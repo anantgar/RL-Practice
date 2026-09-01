@@ -5,13 +5,14 @@ from environment import CliffWalk
 GAMMA=0.9
 MAX_EPISODE_LENGTH = 100
 
-def generate_episode(policy, env) -> list[tuple[Any, Any, float]]:
+def generate_episode(policy, env, S_0:int, A_0:int|None=None) -> list[tuple[Any, Any, float]]:
     states, actions, rewards = [], [], []
-    state = env.get_random_state()
+    state = S_0
+    action = A_0
     env.set_state(state)
     terminal = False
     while not terminal and len(states) < MAX_EPISODE_LENGTH:
-        action = policy[state]
+        action = policy[state] if action is None else action
         next_state, reward, terminal = env.step(action)
         states.append(state)
         actions.append(action)
@@ -20,10 +21,10 @@ def generate_episode(policy, env) -> list[tuple[Any, Any, float]]:
     return states, actions, rewards
 
 def mc_prediction(policy, value_fn, env, num_iterations:int, first_visit:bool=True):
-
     returns = {}
     for _ in range(num_iterations):
-        states, actions, rewards = generate_episode(policy, env)
+        S_0 = env.get_random_state()
+        states, actions, rewards = generate_episode(policy, env, S_0)
         G = 0
         for i in range(len(states) - 1, -1, -1):
             state, action, reward = states[i], actions[i], rewards[i]
@@ -35,6 +36,24 @@ def mc_prediction(policy, value_fn, env, num_iterations:int, first_visit:bool=Tr
                 returns[state].append(G)
                 value_fn[state] = np.mean(returns[state])
             
+
+def exploring_starts(policy, value_fn, env, num_iterations:int, first_visit:bool=True):
+    returns = {}
+    for _ in range(num_iterations):
+        S_0, A_0 = env.get_random_state(), env.get_random_action()
+        states, actions, rewards = generate_episode(policy, env, S_0, A_0)
+        G = 0
+        for i in range(len(states) - 1, -1, -1):
+            state, action, reward = states[i], actions[i], rewards[i]
+            G = reward + GAMMA * G
+
+            if (state, action) not in zip(states[:i], actions[:i]) and first_visit:
+                if (state, action) not in returns:
+                    returns[(state, action)] = []
+                returns[(state, action)].append(G)
+                value_fn[state, action] = np.mean(returns[(state, action)])
+                policy[state] = np.argmax(value_fn[state])
+
 
 def main():
     env = CliffWalk(x_dim=12, y_dim=4, is_slippery=False)
