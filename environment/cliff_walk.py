@@ -1,5 +1,4 @@
 from .environment import Environment
-from enum import Enum
 import random
 import numpy as np
 
@@ -12,11 +11,11 @@ class CliffWalk(Environment):
         self.is_slippery = is_slippery
 
     def step(self, action:int):
-        if action == 0:
+        if action == 0: # up
             new_position = (self.position[0], self.position[1] - 1)
-        elif action == 1:
+        elif action == 1: # right
             new_position = (self.position[0] + 1, self.position[1])
-        elif action == 2:
+        elif action == 2: # down
             new_position = (self.position[0], self.position[1] + 1)
         elif action == 3:
             new_position = (self.position[0] - 1, self.position[1])

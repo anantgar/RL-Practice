@@ -8,7 +8,7 @@ class Environment(ABC):
     def __init__(self):
         pass
 
-    # Returns dict of reward, is terminated, and next state
+    # Returns tuple of next state, reward, and whether the episode is terminated
     @abstractmethod
     def step(self, action) -> tuple[Any, float, bool]:
         pass

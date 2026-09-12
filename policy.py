@@ -1,8 +1,6 @@
 import numpy as np
 from environment import RandomWalk, RandomWalkAction
-
-GAMMA = 0.9
-THETA = 0.0001
+from config import GAMMA, THETA
 
 def init_fn(num_states:int, seed:int = 42):
     np.random.seed(seed)
