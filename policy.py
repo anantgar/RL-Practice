@@ -9,9 +9,8 @@ def init_fn(num_states:int, seed:int = 42):
     return policy, value_fn
 
 
-def policy_evaluation(policy, value_fn):
+def policy_evaluation(policy, value_fn, env):
     num_states = policy.shape[0]
-    env = RandomWalk(num_states)
 
     while True:
         delta = 0.0
@@ -28,7 +27,7 @@ def policy_evaluation(policy, value_fn):
             break
 
 
-def policy_improvement(policy, value_fn):
+def policy_improvement(policy, value_fn, env):
 
     def get_best_action(env, state):
         num_actions = 2
@@ -44,7 +43,6 @@ def policy_improvement(policy, value_fn):
 
     stable = True
     num_states = policy.shape[0]
-    env = RandomWalk(num_states)
 
     for i in range(num_states):
         old_action = policy[i]
@@ -54,12 +52,12 @@ def policy_improvement(policy, value_fn):
 
     return stable
 
-def policy_iteration(num_states:int, max_iterations:int = 100):
+def policy_iteration(num_states:int, max_iterations:int = 100, env:RandomWalk = None):
     policy, value_fn = init_fn(num_states, seed=42)
 
     for _ in range(max_iterations):
 
-        policy_evaluation(policy, value_fn)
+        policy_evaluation(policy, value_fn, env)
         stable = policy_improvement(policy, value_fn)
         if stable:
             break
@@ -69,10 +67,9 @@ def policy_iteration(num_states:int, max_iterations:int = 100):
     print("Value Function:")
     print(value_fn)
 
-def value_iteration(num_states:int, max_iterations:int = 100):
+def value_iteration(num_states:int, max_iterations:int = 100, env:RandomWalk = None):
     policy, value_fn = init_fn(num_states, seed=42)
     num_actions = 2
-    env = RandomWalk(num_states)
     while True:
         delta = 0.0
         for i in range(num_states):
@@ -98,9 +95,9 @@ def value_iteration(num_states:int, max_iterations:int = 100):
 
 def main():
     print("* * * Policy Iteration:")
-    policy_iteration(5)
+    policy_iteration(5, env=RandomWalk(5))
     print("* * * Value Iteration:")
-    value_iteration(5)
+    value_iteration(5, env=RandomWalk(5))
 
 if __name__ == "__main__":
     main()

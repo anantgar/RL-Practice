@@ -29,6 +29,8 @@ Setting π(s) = the action that leads to the highest expected future return
 1. MC works when we don't have a reliable state transition model. DP requires us to know the probability of each state transition (we need to know the probability of reaching state s' given action a in state s). For example, blackjack environment works better with MC since it's uncertain what s' will be after the player hits.
 2. State value estimates in MC are independent of each other, so we could create precise estimations for a select set of states and not all states. In DP, value estimates for state s are based on the estimates of its neighboring "transition" states.
 
+
+
 ## MC action value estimation
 
 Estimation of value associated with (state, action) pairs.
@@ -54,3 +56,21 @@ The probability of the trajectory occurring in the target policy over the probab
 If we multiply the return observed by b, G_t, with the ratio, we have the expectation of the return under π.
 
 When we average this across all visits of state s, we can either uniformly average or weighted average with the IS ratios.
+
+# Temporal-Difference Learning
+
+V(S_t) <- V(S_t) + lr * (G_t+1 - V(S_t))
+
+V(S_t) <- V(S_t) + lr * (r_t + gamma * V(S_t+1) - V(S_t))
+
+TD learning algorithm runs forward in time. Changes to V are made based on the immediate rewards and future predicted values. Unlike MC methods which run backwards in time and utilize the observed return to update V.
+
+TD is more resilient to environment changes since it learns V of it's own predictions from state to state. Only affected states need to be relearned.
+
+TD doesn't require a model of its environment (reward and state transition probabilities) unlike DP.
+
+TD is an online learning algorithm that doesn't require the full episode to learn. Works on endless episodes.
+
+TD tends to converge faster than MC methods.
+
+Batch updates to V with TD converges deterministically to a single answer with a sufficiently small learning rate. Non-batch TD is less optimal.

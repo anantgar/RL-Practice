@@ -63,6 +63,25 @@ def exploring_starts(policy, value_fn, env, num_iterations:int, first_visit:bool
                 value_fn[state, action] = returns[(state, action)][0]
                 policy[state] = np.argmax(value_fn[state])
 
+def mc_control_off_policy(target_policy:np.ndarray, value_fn:np.ndarray, env, num_iterations:int):
+    target_policy = np.argmax(value_fn, axis=1)
+    cumulative_weights = {}
+
+    for _ in range(num_iterations):
+        behavior_policy = np.random.rand(target_policy.shape) + 0.1
+        S_0 = env.get_random_state()
+        states, actions, rewards = generate_episode(behavior_policy, env, S_0)
+        G = 0
+        W = 1
+        for i in range(len(states) - 1, -1, -1):
+            state, action, reward = states[i], actions[i], rewards[i]
+            G = reward + GAMMA * G
+            cumulative_weights[state, action] = cumulative_weights.get((state, action), 0.0) + W
+            value_fn[state, action] += (W / cumulative_weights[state, action]) * (G - value_fn[state, action])
+            target_policy[state] = np.argmax(value_fn[state])
+            if target_policy[state] != action:
+                break
+            W *= 1.0 / behavior_policy[state, action]
 
 
 def main():
